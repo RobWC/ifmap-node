@@ -32,7 +32,7 @@ xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP- METADATA/1"
 }
 
 IfmapNode.prototype.setUser = function(sessionID) {
-  var message = '<?xml version="1.0"?> <ifmap:publish xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP- METADATA/1"><env:Header><ifmap:session-id>' + sessionID +  '</ifmap:session-id></env:Header><update><identifier><identity name="joe" type="username"/></identifier>';  
+  var message = '<?xml version="1.0"?><ifmap:publish xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1"><env:Header><ifmap:session-id>' + sessionID +  '</ifmap:session-id></env:Header><update><identifier><identity name="joe" type="username"/></identifier>';  
   return message;
 };
 
