@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns0:publish xmlns:ns0="http://www.trustedcomputinggroup.org/2006/IFMAP/1"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.trustedcomputinggroup.org/2006/IFMAP/1 file:/Volumes/Spinner/Dropbox/Development%20Projects/ifmap-node/ifmap.xsd">
+    <update>
+        <link>
+            <identifier>
+                <identity name="name0" type="aik-name"/>
+            </identifier>
+            <identifier>
+                <device>
+                    <name>name1</name>
+                </device>
+            </identifier>
+        </link>
+    </update>
+    <delete>
+        <link>
+            <identifier>
+                <mac-address value="value0"/>
+            </identifier>
+            <identifier>
+                <access-request name="name2"/>
+            </identifier>
+        </link>
+    </delete>
+    <update>
+        <identifier>
+            <identity name="name3" type="aik-name"/>
+        </identifier>
+    </update>
+</ns0:publish>
