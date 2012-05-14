@@ -1,7 +1,11 @@
-var https = require('https');
-var parser = require('xml2json');
-var IfmapNode = require('./ifmap-node.js').IfmapNode;
+var IFMapClient = require('./ifmap-session.js').IFMapClient;
 
+var client = new IFMapClient('10.0.1.250', '8096', '/', 'admin', 'hello');
+client.createSession();
+
+console.log('TEST ' + client.sessionID);
+
+/*
 //evil globals
 var sessionID = '';
 var publisherID = '';
@@ -97,3 +101,4 @@ req.on('error', function(e) {
 
 req.write(ifmapper.getSession() + '\n');
 req.end();
+*/

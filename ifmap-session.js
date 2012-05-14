@@ -1,7 +1,8 @@
 var https = require('https');
-var IfmapNode = require('./ifmap-commands.js').IfmapNode;
+var ifMapCommands = require('./ifmap-commands.js').IFMapCommands;
+var parser = require('xml2json');
 
-var IFmapClient = function(soapHost, soapPort, soapPath, username, password) {
+var IFMapClient = function(soapHost, soapPort, soapPath, username, password) {
   this.sessionOptions = {
     host: soapHost,
     port: soapPort,
@@ -17,20 +18,20 @@ var IFmapClient = function(soapHost, soapPort, soapPath, username, password) {
   this.publisherID = ''
 };
 
-IfmapClient.constructor = IFmapClient;
+exports.IFMapClient = IFMapClient;
 
-IFmapClient.prototype.createSession = function() {
+IFMapClient.prototype.createSession = function() {
+  var ifmapper = new ifMapCommands();
   var self = this;
-  sessionOptions.headers['Content-Length'] = getSesssion().length
-  var ifmapper = new IfmapNode();
-  var req = https.request(sessionOptions, function(res) {
+  self.sessionOptions.headers['Content-Length'] = ifmapper.getSession().length
+  var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
       console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
       self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-      console.log(sessionID + ' ' + publisherID);
+      console.log(self.sessionID + ' ' + self.publisherID);
 
     });
 
@@ -44,3 +45,5 @@ IFmapClient.prototype.createSession = function() {
   req.write(ifmapper.getSession() + '\n');
   req.end();
 };
+
+exports.IFMapClient = IFMapClient;

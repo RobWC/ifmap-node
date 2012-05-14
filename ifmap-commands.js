@@ -1,15 +1,16 @@
-var IfmapNode = function() {
+var IFMapCommands = function() {
   this.info = '';
+  return this;
 };
 
-IfmapNode.constructor = IfmapNode;
+exports.IFMapCommands = IFMapCommands;
 
-IfmapNode.prototype.getSession = function() {
+IFMapCommands.prototype.getSession = function() {
   var message = '<?xml version="1.0" encoding="UTF-8"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1"><SOAP-ENV:Body><ifmap:new-session/> </SOAP-ENV:Body></SOAP-ENV:Envelope>';
   return message;
 };
 
-IfmapNode.prototype.getUsers = function(sessionID) {
+IFMapCommands.prototype.getUsers = function(sessionID) {
   username = 'DrBeef';
   var message = '<?xml version="1.0" encoding="utf-8"?>\
   <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jnpr="http://www.juniper.net/2008/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:jnpr2="http://www.juniper.net/2009/IFMAP/1" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:wsdl="http://www.juniper.net/2008/IFMAP/1/ifmap.wsdl">\
@@ -27,7 +28,7 @@ IfmapNode.prototype.getUsers = function(sessionID) {
   return message;
 }
 
-IfmapNode.prototype.subscribeUser = function(sessionID,username) {
+IFMapCommands.prototype.subscribeUser = function(sessionID,username) {
   username = 'DrBeef';
   var message = '<?xml version="1.0" encoding="utf-8"?>\
   <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jnpr="http://www.juniper.net/2008/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:jnpr2="http://www.juniper.net/2009/IFMAP/1" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:wsdl="http://www.juniper.net/2008/IFMAP/1/ifmap.wsdl">\
@@ -47,7 +48,7 @@ IfmapNode.prototype.subscribeUser = function(sessionID,username) {
   return message;
 };
 
-IfmapNode.prototype.poll = function(sessionID,publisherID) {
+IFMapCommands.prototype.poll = function(sessionID,publisherID) {
   username = 'DrBeef';
   var message = '<?xml version="1.0" encoding="utf-8"?>\
   <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jnpr="http://www.juniper.net/2008/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:jnpr2="http://www.juniper.net/2009/IFMAP/1" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:wsdl="http://www.juniper.net/2008/IFMAP/1/ifmap.wsdl">\
@@ -61,7 +62,7 @@ IfmapNode.prototype.poll = function(sessionID,publisherID) {
   return message;
 };
 
-IfmapNode.prototype.deleteUser = function(sessionID,username) {
+IFMapCommands.prototype.deleteUser = function(sessionID,username) {
   username = 'DrBeef';
   var message = '<?xml version="1.0" encoding="utf-8"?>\
   <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jnpr="http://www.juniper.net/2008/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:jnpr2="http://www.juniper.net/2009/IFMAP/1" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:wsdl="http://www.juniper.net/2008/IFMAP/1/ifmap.wsdl">\
@@ -81,7 +82,7 @@ IfmapNode.prototype.deleteUser = function(sessionID,username) {
   return message;
 }
 
-IfmapNode.prototype.setUser = function(sessionID, username) {
+IFMapCommands.prototype.setUser = function(sessionID, username) {
   username = 'DrBeef';
   var message = '<?xml version="1.0" encoding="utf-8"?>\
   <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jnpr="http://www.juniper.net/2008/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:jnpr2="http://www.juniper.net/2009/IFMAP/1" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:wsdl="http://www.juniper.net/2008/IFMAP/1/ifmap.wsdl">\
@@ -118,5 +119,3 @@ IfmapNode.prototype.setUser = function(sessionID, username) {
 </SOAP-ENV:Envelope>';
   return message;
 };
-
-exports.IfmapNode = IfmapNode;
