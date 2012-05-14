@@ -3,7 +3,15 @@ var IFMapClient = require('./ifmap-session.js').IFMapClient;
 var client = new IFMapClient('10.0.1.250', '8096', '/', 'admin', 'hello');
 client.createSession();
 
-console.log('TEST ' + client.sessionID);
+client.on('end1',function(d){
+   console.log('END1!');
+   client.publishUpdate();
+});
+
+client.on('response', function(d){
+   console.log('RESPONSE!');
+   console.log(d); 
+});
 
 /*
 //evil globals
