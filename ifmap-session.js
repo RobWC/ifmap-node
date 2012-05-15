@@ -45,8 +45,7 @@ IFMapClient.prototype.createSession = function(options) {
     });
     
     res.on('end', function(d){
-      self.emit('end1','');
-      self.emit('session',self.sessionID);
+      self.emit('sessionStart',self.sessionID);
     });
 
   });
@@ -100,7 +99,7 @@ IFMapClient.prototype.publishUpdate = function(options) {
     });
     
     res.on('end', function(d){
-      self.emit('end','');
+      self.emit('published','');
     });
   });
 
@@ -110,6 +109,34 @@ IFMapClient.prototype.publishUpdate = function(options) {
 
   req.write(ifmapper.setUser(self.sessionID,'DrBeef'));
   req.end(); 
+};
+
+IFMapClient.prototype.poll = function(options) {
+  var ifmapper = new ifMapCommands();
+  var self = this;
+  var response = '';
+  self.sessionOptions.headers['Content-Length'] = ifmapper.poll(self.sessionID,self.publisherID).length
+  var req = https.request(self.sessionOptions, function(res) {
+
+    res.on('data', function(d) {
+      console.log(d.toString());
+      var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      response = output;
+      self.emit('polled',{msg:response,type:'poll'});
+      //self.emit('response',output);
+    });
+    
+    res.on('end', function(d){
+      self.emit('polled',{msg:response,type:'poll'});
+    });
+  });
+
+  req.on('error', function(e) {
+    console.error(e);
+  });
+
+  req.write(ifmapper.poll(self.sessionID));
+  //req.end(); 
 };
 
 IFMapClient.prototype.subscribe = function(options) {
@@ -125,8 +152,7 @@ IFMapClient.prototype.subscribe = function(options) {
     });
     
     res.on('end', function(d){
-      self.emit('end','');
-      self.emit('subscribed');
+      self.emit('subscribed','channel12');
     });
   });
 
@@ -135,5 +161,32 @@ IFMapClient.prototype.subscribe = function(options) {
   });
 
   req.write(ifmapper.setUser(self.subscribeUser,'DrBeef'));
+  req.end(); 
+};
+
+IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
+  var ifmapper = new ifMapCommands();
+  var self = this;
+  var response = ''
+  self.sessionOptions.headers['Content-Length'] = ifmapper.subscribeDevice(self.sessionID,'happy').length
+  var req = https.request(self.sessionOptions, function(res) {
+
+    res.on('data', function(d) {
+      console.log(d.toString());
+      var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      response = output;
+      self.emit('response',output);
+    });
+    
+    res.on('end', function(d){
+      self.emit('subscribed', {msg:response,type:'device',name:deviceName});
+    });
+  });
+
+  req.on('error', function(e) {
+    console.error(e);
+  });
+
+  req.write(ifmapper.subscribeDevice(self.sessionID,'happy'));
   req.end(); 
 };

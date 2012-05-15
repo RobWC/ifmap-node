@@ -3,14 +3,28 @@ var IFMapClient = require('./ifmap-session.js').IFMapClient;
 var client = new IFMapClient('10.0.1.250', '8096', '/', 'admin', 'hello');
 client.createSession();
 
-client.on('end1',function(d){
-   console.log('END1!');
-   client.publishUpdate();
+client.on('sessionStart', function(d) {
+    console.log('Session Started!');
+    //subscribing
+    var subscribeCalback = function() {
+        client.subscribeDevice({}, 'happy');
+    };
+    var callback = function() {
+        client.poll();
+    };
+    subscribeCalback(); //start the sub
+    setInterval(callback, 10000);
+    setInterval(subscribeCalback,120000)
 });
 
-client.on('response', function(d){
-   console.log('RESPONSE!');
-   console.log(d); 
+client.on('polled',function(d){
+    console.log('Poll Results');
+    console.log(d);
+});
+
+client.on('subscribed', function(d) {
+    console.log('Subscribed!');
+    console.log(d.msg.SOAPENV_Envelope.SOAPENV_Body.ifmap_response);
 });
 
 /*
