@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ns0:subscribe xmlns:ns0="http://www.trustedcomputinggroup.org/2006/IFMAP/1"
+<ns0:poll xmlns:ns0="http://www.trustedcomputinggroup.org/2006/IFMAP/1"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.trustedcomputinggroup.org/2006/IFMAP/1 file:/Volumes/Spinner/Dropbox/Development%20Projects/ifmap-node/ifmap.xsd">
-    <update name="name0">
-        <identifier>
-            <mac-address value="value0"/>
-        </identifier>
-    </update>
-    <delete name="name1"/>
-    <update name="name2">
-        <identifier>
-            <identity name="name3" type="aik-name"/>
-        </identifier>
-    </update>
-</ns0:subscribe>
+ xsi:schemaLocation="http://www.trustedcomputinggroup.org/2006/IFMAP/1 file:/Volumes/Spinner/Dropbox/Development%20Projects/ifmap-node/ifmap.xsd"/>

@@ -115,19 +115,51 @@ IFMapClient.prototype.poll = function(options) {
   var ifmapper = new ifMapCommands();
   var self = this;
   var response = '';
-  self.sessionOptions.headers['Content-Length'] = ifmapper.poll(self.sessionID,self.publisherID).length
+  self.sessionOptions.headers['Content-Length'] = ifmapper.getPollSession(self.sessionID).length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
       console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       response = output;
-      self.emit('polled',{msg:response,type:'poll'});
+      self.emit('pollSession',{msg:response,type:'pollSession'});
+      //START NEW POLL HERE
+      
       //self.emit('response',output);
     });
     
     res.on('end', function(d){
-      self.emit('polled',{msg:response,type:'poll'});
+      //self.emit('polled',{msg:response,type:'poll'});
+    });
+  });
+
+  req.on('error', function(e) {
+    console.error(e);
+  });
+
+  req.write(ifmapper.getPollSession(self.sessionID));
+  req.end(); 
+};
+
+IFMapClient.prototype.pollData = function(options) {
+  var ifmapper = new ifMapCommands();
+  var self = this;
+  var response = '';
+  self.sessionOptions.headers['Content-Length'] = ifmapper.poll(self.sessionID).length
+  var req = https.request(self.sessionOptions, function(res) {
+
+    res.on('data', function(d) {
+      console.log(d.toString());
+      var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      response = output;
+      self.emit('poll',{msg:response,type:'poll'});
+      //START NEW POLL HERE
+      
+      //self.emit('response',output);
+    });
+    
+    res.on('end', function(d){
+      //self.emit('polled',{msg:response,type:'poll'});
     });
   });
 
@@ -136,7 +168,7 @@ IFMapClient.prototype.poll = function(options) {
   });
 
   req.write(ifmapper.poll(self.sessionID));
-  //req.end(); 
+  req.end(); 
 };
 
 IFMapClient.prototype.subscribe = function(options) {

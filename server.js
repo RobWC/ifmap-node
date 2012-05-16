@@ -9,15 +9,11 @@ client.on('sessionStart', function(d) {
     var subscribeCalback = function() {
         client.subscribeDevice({}, 'happy');
     };
-    var callback = function() {
-        client.poll();
-    };
     subscribeCalback(); //start the sub
-    setInterval(callback, 10000);
-    setInterval(subscribeCalback,120000)
+    setInterval(subscribeCalback,120000);
 });
 
-client.on('polled',function(d){
+client.on('poll',function(d){
     console.log('Poll Results');
     console.log(d);
 });
@@ -25,102 +21,12 @@ client.on('polled',function(d){
 client.on('subscribed', function(d) {
     console.log('Subscribed!');
     console.log(d.msg.SOAPENV_Envelope.SOAPENV_Body.ifmap_response);
+    client.poll();
 });
 
-/*
-//evil globals
-var sessionID = '';
-var publisherID = '';
-//var soapPath = '/dana-ws/soap/dsifmap';
-var soapPath = '/';
-var soapPort = 8096;
-//var soapPort = 443;
-var soapHost = '10.0.1.250';
-
-var ifmapper = new IfmapNode();
-
-var options = {
-  host: soapHost,
-  port: soapPort,
-  path: soapPath,
-  method: 'POST',
-  auth: 'admin:hello',
-  headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': ifmapper.getSession().length
-      }
-};
-
-var req = https.request(options, function(res) {
-
-  res.on('data', function(d) {
-    console.log(d.toString());
-    var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-    sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-    publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-    console.log(sessionID + ' ' + publisherID);
-    
-    var options2 = {
-        host: soapHost,
-        port: soapPort,
-        path: soapPath,
-        method: 'POST',
-        auth: 'admin:hello',
-        headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Content-Length': ifmapper.subscribeUser(sessionID,'DrBeef').length
-            }
-      };
-      
-      var req2 = https.request(options2, function(res2) {
-        res2.on('data', function(d) {
-          console.log(d.toString());
-          var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-        
-            var options3 = {
-                host: soapHost,
-                port: soapPort,
-                path: soapPath,
-                method: 'POST',
-                auth: 'admin:hello',
-                headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Content-Length': ifmapper.subscribeUser(sessionID).length
-                    }
-              };
-              
-              var req3 = https.request(options3, function(res3) {
-                res3.on('data', function(d) {
-                  console.log(d.toString());
-                  var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-                });
-              });
-              
-              req3.on('error', function(e) {
-                console.error(e);
-              });
-        
-              req3.write(ifmapper.subscribeUser(sessionID) + '\n');
-              req3.end();
-        });
-      });
-      
-      req2.on('error', function(e) {
-        console.error(e);
-      });
-
-      req2.write(ifmapper.subscribeUser(sessionID,'DrBeef') + '\n');
-      req2.end();
-  });
-  
+client.on('pollSession',function(d){
+    var callback = function() {
+     client.pollData();
+    };
+    setInterval(callback, 5000);
 });
-
-req.on('error', function(e) {
-  console.error(e);
-});
-
-// write data to request body
-
-req.write(ifmapper.getSession() + '\n');
-req.end();
-*/
