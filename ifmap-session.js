@@ -38,7 +38,6 @@ IFMapClient.prototype.createSession = function(options) {
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
-      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
       self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
@@ -93,7 +92,6 @@ IFMapClient.prototype.publishUpdate = function(options) {
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
-      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.emit('response',output);
     });
@@ -111,7 +109,7 @@ IFMapClient.prototype.publishUpdate = function(options) {
   req.end(); 
 };
 
-IFMapClient.prototype.poll = function(options) {
+IFMapClient.prototype.getPollSession = function(options) {
   var ifmapper = new ifMapCommands();
   var self = this;
   var response = '';
@@ -119,11 +117,9 @@ IFMapClient.prototype.poll = function(options) {
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
-      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       response = output;
       self.emit('pollSession',{msg:response,type:'pollSession'});
-      //START NEW POLL HERE
       
       //self.emit('response',output);
     });
@@ -154,7 +150,6 @@ IFMapClient.prototype.pollData = function(options) {
       response = output;
       self.emit('poll',{msg:response,type:'poll'});
       //START NEW POLL HERE
-      
       //self.emit('response',output);
     });
     
@@ -178,7 +173,6 @@ IFMapClient.prototype.subscribe = function(options) {
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
-      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.emit('response',output);
     });
@@ -200,11 +194,10 @@ IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
   var ifmapper = new ifMapCommands();
   var self = this;
   var response = ''
-  self.sessionOptions.headers['Content-Length'] = ifmapper.subscribeDevice(self.sessionID,'happy').length
+  self.sessionOptions.headers['Content-Length'] = ifmapper.subscribeDevice(self.sessionID,deviceName).length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
-      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       response = output;
       self.emit('response',output);
@@ -219,6 +212,6 @@ IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
     console.error(e);
   });
 
-  req.write(ifmapper.subscribeDevice(self.sessionID,'happy'));
+  req.write(ifmapper.subscribeDevice(self.sessionID,deviceName));
   req.end(); 
 };

@@ -5,13 +5,14 @@ var IFMapCommands = function() {
 
 exports.IFMapCommands = IFMapCommands;
 
+//start sessions
 IFMapCommands.prototype.getSession = function() {
   var message = '<?xml version="1.0" encoding="UTF-8"?>\
-                <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1">\
-                  <SOAP-ENV:Body>\
-                    <ifmap:new-session/>\
-                  </SOAP-ENV:Body>\
-                </SOAP-ENV:Envelope>';
+    <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1">\
+      <SOAP-ENV:Body>\
+        <ifmap:new-session/>\
+      </SOAP-ENV:Body>\
+    </SOAP-ENV:Envelope>';
   return message;
 };
 
@@ -75,7 +76,7 @@ IFMapCommands.prototype.subscribeDevice = function(sessionID,deviceName) {
     </SOAP-ENV:Header>\
     <SOAP-ENV:Body>\
       <ifmap:subscribe>\
-        <update max-depth="10" max-size="0" name="admin">\
+        <update name="admin">\
           <identifier>\
             <device>\
               <name>' + deviceName +'</name>\

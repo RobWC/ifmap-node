@@ -7,26 +7,29 @@ client.on('sessionStart', function(d) {
     console.log('Session Started!');
     //subscribing
     var subscribeCalback = function() {
-        client.subscribeDevice({}, 'happy');
+        client.subscribeDevice({},'1000:41');
     };
     subscribeCalback(); //start the sub
-    setInterval(subscribeCalback,120000);
+    setInterval(subscribeCalback,60000);
 });
 
 client.on('poll',function(d){
-    console.log('Poll Results');
+    console.log('Poll Results ' + Date());
     console.log(d);
+    //console.log(d.msg.SOAPENV_Envelope.SOAPENV_Body.ifmap_response.pollResult.searchResult.identifierResult.identifier.device);
 });
 
 client.on('subscribed', function(d) {
     console.log('Subscribed!');
     console.log(d.msg.SOAPENV_Envelope.SOAPENV_Body.ifmap_response);
-    client.poll();
+    //get a new polling session
+    client.getPollSession({});
 });
 
 client.on('pollSession',function(d){
-    var callback = function() {
+    var pollingCallback = function() {
      client.pollData();
     };
-    setInterval(callback, 5000);
+    //setup a new callback to continue polling
+    console.log('Polling Interval Timer ' + setInterval(pollingCallback, 5000));
 });
