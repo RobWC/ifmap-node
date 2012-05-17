@@ -173,6 +173,7 @@ IFMapClient.prototype.subscribe = function(options) {
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
+      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.emit('response',output);
     });
@@ -198,6 +199,7 @@ IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
+      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       response = output;
       self.emit('response',output);

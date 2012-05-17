@@ -27,9 +27,12 @@ client.on('subscribed', function(d) {
 });
 
 client.on('pollSession',function(d){
+    console.log('Poll Session Started');
+    console.log(d)
     var pollingCallback = function() {
      client.pollData();
     };
     //setup a new callback to continue polling
-    console.log('Polling Interval Timer ' + setInterval(pollingCallback, 5000));
+    //setInterval(pollingCallback, 3000);
+    client.pollData();
 });

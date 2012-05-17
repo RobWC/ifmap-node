@@ -1,0 +1,15 @@
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: have publisherId on num ids: 3 
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining metadata ( 1 ) on id: Identifier("AccessRequest":"":"1000:sid8da887626ffab82248dd4f033fea322147c1cfbbff2818ff") 
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining metadata ( 1 ) on id: Identifier("AccessRequest":"":"1000:sid61cb6dcfa3c8124f068263c8216fae00608028dcffff1568") 
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining metadata ( 2 ) on id: Identifier("IpAddressIPv4":"":"10.0.1.20") 
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: have publisherId on num links: 8 
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("AccessRequest":"":"1000:sid8da887626ffab82248dd4f033fea322147c1cfbbff2818ff") , Identifier("IpAddressIPv4":"":"10.0.1.20") )  
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("AccessRequest":"":"1000:sid8da887626ffab82248dd4f033fea322147c1cfbbff2818ff") , Identifier("DeviceName":"":"1000:42") )  
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("IpAddressIPv4":"":"10.0.1.171") , Identifier("AccessRequest":"":"1000:sid8da887626ffab82248dd4f033fea322147c1cfbbff2818ff") )  
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("AccessRequest":"":"1000:sid8da887626ffab82248dd4f033fea322147c1cfbbff2818ff") , Identifier("IdentityUsername":"":"ucameron") )  
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("IpAddressIPv4":"":"10.0.1.20") , Identifier("AccessRequest":"":"1000:sid61cb6dcfa3c8124f068263c8216fae00608028dcffff1568") )  
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("DeviceName":"":"1000:41") , Identifier("AccessRequest":"":"1000:sid61cb6dcfa3c8124f068263c8216fae00608028dcffff1568") )  
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("IpAddressIPv4":"":"10.0.1.170") , Identifier("AccessRequest":"":"1000:sid61cb6dcfa3c8124f068263c8216fae00608028dcffff1568") )  
+2012-05-16T21:44:33Z: MapGraphPlugin::deleteMetaWithPublisherId: Examining publisher metadata ( 1 ) on link: QPair(Identifier("AccessRequest":"":"1000:sid61cb6dcfa3c8124f068263c8216fae00608028dcffff1568") , Identifier("IdentityUsername":"":"rcameron") )  
+2012-05-16T21:44:33Z: QString MapSessions::addActiveSSRCForClient(QString) : Got session-id to use: "3f25f7a5c02948a68e9854d6400b7aaa" 
+2012-05-16T21:44:33Z: void ClientHandler::sendResponse(QByteArray, MapRequest::RequestVersion) : sending response from ClientHandler: this: ClientHandler(0x244f600) 
