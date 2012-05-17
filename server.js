@@ -30,8 +30,9 @@ client.on('pollSession',function(d){
     console.log('Poll Session Started');
     console.log(d)
     //setup a new callback to continue polling
+    client.pollData();
     setInterval(function() {
       console.log('Polling!')
       client.pollData();
-    }, 5000);
+    }, 30000);
 });

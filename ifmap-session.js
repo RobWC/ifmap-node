@@ -9,7 +9,7 @@ var parser = require('xml2json');
 var redis;
 var redisClient;
 
-https.globalAgent.maxSockets = 100;
+//https.globalAgent.maxSockets = 20;
 
 var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useRedis) {
   events.EventEmitter.call(this);
@@ -31,6 +31,7 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
   this.sessionID = '';
   this.publisherID = '';
   this.useRedis = useRedis;
+  this.ifmapper = new ifMapCommands();
 };
 
 util.inherits(IFMapClient,events.EventEmitter);
@@ -38,9 +39,9 @@ util.inherits(IFMapClient,events.EventEmitter);
 exports.IFMapClient = IFMapClient;
 
 IFMapClient.prototype.createSession = function(options) {
-  var ifmapper = new ifMapCommands();
   var self = this;
-  self.sessionOptions.headers['Content-Length'] = ifmapper.getSession().length
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.getSession().length
+  
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
@@ -60,15 +61,13 @@ IFMapClient.prototype.createSession = function(options) {
   });
 
   // write data to request body
-  req.write(ifmapper.getSession());
-  req.end(); 
+  req.end(this.ifmapper.getSession()); 
   
 };
 
 IFMapClient.prototype.publishUpdate = function(options) {
-  var ifmapper = new ifMapCommands();
   var self = this;
-  self.sessionOptions.headers['Content-Length'] = ifmapper.setUser(self.sessionID,'DrBeef').length
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.setUser(self.sessionID,'DrBeef').length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
@@ -87,14 +86,12 @@ IFMapClient.prototype.publishUpdate = function(options) {
     console.error(e);
   });
 
-  req.write(ifmapper.setUser(self.sessionID,'DrBeef'));
-  req.end(); 
+  req.end(this.ifmapper.setUser(self.sessionID,'DrBeef')); 
 };
 
 IFMapClient.prototype.publishUpdate = function(options) {
-  var ifmapper = new ifMapCommands();
   var self = this;
-  self.sessionOptions.headers['Content-Length'] = ifmapper.setUser(self.sessionID,'DrBeef').length
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.setUser(self.sessionID,'DrBeef').length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
@@ -111,16 +108,14 @@ IFMapClient.prototype.publishUpdate = function(options) {
     console.error(e);
   });
 
-  req.write(ifmapper.setUser(self.sessionID,'DrBeef'));
-  req.end(); 
+  req.end(this.ifmapper.setUser(self.sessionID,'DrBeef')); 
 };
 
 IFMapClient.prototype.getPollSession = function(options) {
-  var ifmapper = new ifMapCommands();
   var self = this;
   var response = '';
 
-  self.sessionOptions.headers['Content-Length'] = ifmapper.getPollSession(self.sessionID).length
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.getPollSession(self.sessionID).length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
@@ -139,46 +134,49 @@ IFMapClient.prototype.getPollSession = function(options) {
   req.on('error', function(e) {
     console.error(e);
   });
+  
+  req.setTimeout(5000, function(d) {
+    console.log('Poll timed out');
+  });
 
-  req.write(ifmapper.getPollSession(self.sessionID));
-  req.end(); 
+  req.end(this.ifmapper.getPollSession(self.sessionID)); 
 };
 
 IFMapClient.prototype.pollData = function(options) {
-  var ifmapper = new ifMapCommands();
   var self = this;
-  var response = '';
-  self.sessionOptions.headers['Content-Length'] = ifmapper.poll(self.sessionID).length
+  self.sessionOptions.headers['Content-Length'] =this.ifmapper.poll(self.sessionID).length
   
   var req = https.request(self.sessionOptions, function(res) {
     res.on('data', function(d) {
       console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-      response = output;
       //REDIS TIME
       if (self.useRedis) {
         client.append('polls',d.toString());
       }
-      self.emit('poll',{msg:response,type:'poll'});
+      self.emit('poll',{msg:output,type:'poll'});
     });
     
+    res.on('error', function(d){
+      console.log('poll error');
+    })
+    
     res.on('end', function(d){
-      //self.emit('polled',{msg:response,type:'poll'});
+      console.log('poll ended');
     });
+    
   });
 
   req.on('error', function(e) {
     console.error(e);
   });
 
-  req.write(ifmapper.poll(self.sessionID));
-  req.end(); 
+  req.end(this.ifmapper.poll(self.sessionID)); 
 };
 
 IFMapClient.prototype.subscribe = function(options) {
-  var ifmapper = new ifMapCommands();
   var self = this;
-  self.sessionOptions.headers['Content-Length'] = ifmapper.subscribeUser(self.sessionID,'DrBeef').length
+  self.sessionOptions.headers['Content-Length'] =this.ifmapper.subscribeUser(self.sessionID,'DrBeef').length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
@@ -196,15 +194,13 @@ IFMapClient.prototype.subscribe = function(options) {
     console.error(e);
   });
 
-  req.write(ifmapper.setUser(self.subscribeUser,'DrBeef'));
-  req.end(); 
+  req.end(this.ifmapper.setUser(self.subscribeUser,'DrBeef')); 
 };
 
 IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
-  var ifmapper = new ifMapCommands();
   var self = this;
   var response = ''
-  self.sessionOptions.headers['Content-Length'] = ifmapper.subscribeDevice(self.sessionID,deviceName).length
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.subscribeDevice(self.sessionID,deviceName).length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
@@ -223,6 +219,5 @@ IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
     console.error(e);
   });
 
-  req.write(ifmapper.subscribeDevice(self.sessionID,deviceName));
-  req.end(); 
+  req.end(this.ifmapper.subscribeDevice(self.sessionID,deviceName)); 
 };
