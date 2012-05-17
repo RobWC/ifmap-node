@@ -1,16 +1,16 @@
 var IFMapClient = require('./ifmap-session.js').IFMapClient;
 
-var client = new IFMapClient('10.0.1.250', '8096', '/', 'admin', 'hello');
+var client = new IFMapClient('10.0.1.250', '8096', '/', 'admin', 'hello',true);
 client.createSession();
 
 client.on('sessionStart', function(d) {
     console.log('Session Started!');
     //subscribing
     var subscribeCalback = function() {
-        client.subscribeDevice({},'1000:41');
+        client.subscribeDevice({},'1000:45');
     };
     subscribeCalback(); //start the sub
-    setInterval(subscribeCalback,60000);
+    //setInterval(subscribeCalback,60000);
 });
 
 client.on('poll',function(d){
@@ -29,10 +29,9 @@ client.on('subscribed', function(d) {
 client.on('pollSession',function(d){
     console.log('Poll Session Started');
     console.log(d)
-    var pollingCallback = function() {
-     client.pollData();
-    };
     //setup a new callback to continue polling
-    //setInterval(pollingCallback, 3000);
-    client.pollData();
+    setInterval(function() {
+      console.log('Polling!')
+      client.pollData();
+    }, 5000);
 });

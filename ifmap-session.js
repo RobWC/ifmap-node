@@ -6,12 +6,17 @@ var events = require('events');
 var ifMapCommands = require('./ifmap-commands.js').IFMapCommands;
 //third party modules
 var parser = require('xml2json');
+var redis;
+var redisClient;
 
-//setup event emitting
+https.globalAgent.maxSockets = 100;
 
-
-var IFMapClient = function(soapHost, soapPort, soapPath, username, password) {
+var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useRedis) {
   events.EventEmitter.call(this);
+  if (useRedis) {
+    redis = require('redis');
+    client = redis.createClient();
+  }
   this.sessionOptions = {
     host: soapHost,
     port: soapPort,
@@ -23,8 +28,9 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password) {
       'Content-Length': ''
     }
   };
-  this.sessionID = '',
-  this.publisherID = ''
+  this.sessionID = '';
+  this.publisherID = '';
+  this.useRedis = useRedis;
 };
 
 util.inherits(IFMapClient,events.EventEmitter);
@@ -113,6 +119,7 @@ IFMapClient.prototype.getPollSession = function(options) {
   var ifmapper = new ifMapCommands();
   var self = this;
   var response = '';
+
   self.sessionOptions.headers['Content-Length'] = ifmapper.getPollSession(self.sessionID).length
   var req = https.request(self.sessionOptions, function(res) {
 
@@ -142,15 +149,17 @@ IFMapClient.prototype.pollData = function(options) {
   var self = this;
   var response = '';
   self.sessionOptions.headers['Content-Length'] = ifmapper.poll(self.sessionID).length
+  
   var req = https.request(self.sessionOptions, function(res) {
-
     res.on('data', function(d) {
       console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       response = output;
+      //REDIS TIME
+      if (self.useRedis) {
+        client.append('polls',d.toString());
+      }
       self.emit('poll',{msg:response,type:'poll'});
-      //START NEW POLL HERE
-      //self.emit('response',output);
     });
     
     res.on('end', function(d){

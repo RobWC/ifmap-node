@@ -76,7 +76,7 @@ IFMapCommands.prototype.subscribeDevice = function(sessionID,deviceName) {
     </SOAP-ENV:Header>\
     <SOAP-ENV:Body>\
       <ifmap:subscribe>\
-        <update name="admin">\
+        <update max-depth="4" name="admin">\
           <identifier>\
             <device>\
               <name>' + deviceName +'</name>\
