@@ -60,8 +60,12 @@ IFMapClient.prototype.createSession = function(options) {
     res.on('data', function(d) {
       console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-      self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-      self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+      if (!!output.SOAPENV_Envelope && !!output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid){
+        self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+        self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+        console.log('Session ID ' + self.sessionID);
+        console.log('Publisher ID ' + self.publisherID);
+      };
     });
     
     res.on('end', function(d){
@@ -103,12 +107,37 @@ IFMapClient.prototype.publishUpdate = function(options) {
   req.end(this.ifmapper.setUser(self.sessionID,'DrBeef')); 
 };
 
+IFMapClient.prototype.testSub = function(options) {
+  var self = this;
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.testSub(self.sessionID).length
+  
+  var req = https.request(self.sessionOptions, function(res) {
+
+    res.on('data', function(d) {
+      console.log(d.toString());
+      var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      self.emit('response',output);
+    });
+    
+    res.on('end', function(d){
+      self.emit('published','');
+    });
+  });
+
+  req.on('error', function(e) {
+    console.error(e);
+  });
+
+  req.end(this.ifmapper.testSub(self.sessionID)); 
+};
+
 IFMapClient.prototype.publishUpdate = function(options) {
   var self = this;
   self.sessionOptions.headers['Content-Length'] = this.ifmapper.setUser(self.sessionID,'DrBeef').length
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
+      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.emit('response',output);
     });
@@ -154,6 +183,7 @@ IFMapClient.prototype.getPollSession = function(options) {
 
 IFMapClient.prototype.pollData = function(options) {
   var self = this;
+  console.log('LENGTH ' + this.ifmapper.poll(self.sessionID).length);
   self.pollSessionOptions.headers['Content-Length'] = this.ifmapper.poll(self.sessionID).length
   
   var httpsP = require('https');
@@ -186,7 +216,7 @@ IFMapClient.prototype.pollData = function(options) {
     console.log('poll response');
   })
 
-  req.end(this.ifmapper.poll(self.sessionID));
+  req.end(this.ifmapper.poll(self.sessionID),'utf8');
 };
 
 IFMapClient.prototype.subscribe = function(options) {
@@ -234,5 +264,5 @@ IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
     console.error(e);
   });
 
-  req.end(this.ifmapper.subscribeDevice(self.sessionID,deviceName)); 
+  req.end(this.ifmapper.subscribeDevice(self.sessionID,deviceName),'utf8'); 
 };
