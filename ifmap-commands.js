@@ -10,7 +10,7 @@ IFMapCommands.prototype.getSession = function() {
   var message = '<?xml version="1.0" encoding="UTF-8"?>\
     <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1">\
       <SOAP-ENV:Body>\
-        <ifmap:new-session/>\
+        <ifmap:new-session></ifmap:new-session>\
       </SOAP-ENV:Body>\
     </SOAP-ENV:Envelope>';
   return message;

@@ -1,6 +1,6 @@
 var IFMapClient = require('./ifmap-session.js').IFMapClient;
 
-var client = new IFMapClient('10.0.1.250', '8096', '/', 'admin', 'hello',true);
+var client = new IFMapClient('10.0.1.21', '443', '/dana-ws/soap/dsifmap', 'admin', 'hello',true);
 client.createSession();
 
 client.on('sessionStart', function(d) {
