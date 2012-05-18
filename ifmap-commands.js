@@ -23,6 +23,19 @@ IFMapCommands.prototype.getPollSession = function(sessionID) {
     </SOAP-ENV:Header>\
     <SOAP-ENV:Body>\
       <ifmap:attach-session>' + sessionID + '</ifmap:attach-session>\
+    </SOAP-ENV:Body>\
+</SOAP-ENV:Envelope>';
+  return message;
+};
+
+
+IFMapCommands.prototype.poll = function(sessionID) {
+  var message = '<?xml version="1.0" encoding="utf-8"?>\
+  <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jnpr="http://www.juniper.net/2008/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:jnpr2="http://www.juniper.net/2009/IFMAP/1" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:wsdl="http://www.juniper.net/2008/IFMAP/1/ifmap.wsdl">\
+    <SOAP-ENV:Header>\
+      <ifmap:session-id>' + sessionID + '</ifmap:session-id>\
+    </SOAP-ENV:Header>\
+    <SOAP-ENV:Body>\
       <ifmap:poll validation="None"/>\
     </SOAP-ENV:Body>\
 </SOAP-ENV:Envelope>';
@@ -84,19 +97,6 @@ IFMapCommands.prototype.subscribeDevice = function(sessionID,deviceName) {
           </identifier>\
         </update>\
       </ifmap:subscribe>\
-    </SOAP-ENV:Body>\
-</SOAP-ENV:Envelope>';
-  return message;
-};
-
-IFMapCommands.prototype.poll = function(sessionID) {
-  var message = '<?xml version="1.0" encoding="utf-8"?>\
-  <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jnpr="http://www.juniper.net/2008/IFMAP/1" xmlns:meta="http://www.trustedcomputinggroup.org/2006/IFMAP-METADATA/1" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:jnpr2="http://www.juniper.net/2009/IFMAP/1" xmlns:ifmap="http://www.trustedcomputinggroup.org/2006/IFMAP/1" xmlns:wsdl="http://www.juniper.net/2008/IFMAP/1/ifmap.wsdl">\
-    <SOAP-ENV:Header>\
-      <ifmap:session-id>' + sessionID + '</ifmap:session-id>\
-    </SOAP-ENV:Header>\
-    <SOAP-ENV:Body>\
-      <ifmap:poll validation="None"/>\
     </SOAP-ENV:Body>\
 </SOAP-ENV:Envelope>';
   return message;

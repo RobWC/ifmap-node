@@ -23,6 +23,19 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
     path: soapPath,
     method: 'POST',
     auth: username + ':' + password,
+    //agent: new https.Agent({maxSockets:1}),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': ''
+    }
+  };
+  this.pollSessionOptions = {
+    host: soapHost,
+    port: soapPort,
+    path: soapPath,
+    method: 'POST',
+    auth: username + ':' + password,
+    agent: false,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': ''
@@ -45,6 +58,7 @@ IFMapClient.prototype.createSession = function(options) {
   var req = https.request(self.sessionOptions, function(res) {
 
     res.on('data', function(d) {
+      console.log(d.toString())
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
       self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
@@ -113,17 +127,15 @@ IFMapClient.prototype.publishUpdate = function(options) {
 
 IFMapClient.prototype.getPollSession = function(options) {
   var self = this;
-  var response = '';
-
-  self.sessionOptions.headers['Content-Length'] = this.ifmapper.getPollSession(self.sessionID).length
-  var req = https.request(self.sessionOptions, function(res) {
+  
+  var httpsP = require('https');
+  self.pollSessionOptions.headers['Content-Length'] = this.ifmapper.getPollSession(self.sessionID).length
+  var req = httpsP.request(self.pollSessionOptions, function(res) {
 
     res.on('data', function(d) {
+      console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-      response = output;
-      self.emit('pollSession',{msg:response,type:'pollSession'});
-      
-      //self.emit('response',output);
+      self.emit('pollSession',{msg:output,type:'pollSession'});
     });
     
     res.on('end', function(d){
@@ -134,19 +146,18 @@ IFMapClient.prototype.getPollSession = function(options) {
   req.on('error', function(e) {
     console.error(e);
   });
-  
-  req.setTimeout(5000, function(d) {
-    console.log('Poll timed out');
-  });
-
+  console.log('PULL SESSION REQUEST ########################');
+  console.log(this.ifmapper.getPollSession(self.sessionID));
+  console.log('####################################');
   req.end(this.ifmapper.getPollSession(self.sessionID)); 
 };
 
 IFMapClient.prototype.pollData = function(options) {
   var self = this;
-  self.sessionOptions.headers['Content-Length'] =this.ifmapper.poll(self.sessionID).length
+  self.pollSessionOptions.headers['Content-Length'] = this.ifmapper.poll(self.sessionID).length
   
-  var req = https.request(self.sessionOptions, function(res) {
+  var httpsP = require('https');
+  var req = httpsP.request(self.pollSessionOptions, function(res) {
     res.on('data', function(d) {
       console.log(d.toString());
       var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
@@ -170,8 +181,12 @@ IFMapClient.prototype.pollData = function(options) {
   req.on('error', function(e) {
     console.error(e);
   });
+  
+  req.on('response', function(d){
+    console.log('poll response');
+  })
 
-  req.end(this.ifmapper.poll(self.sessionID)); 
+  req.end(this.ifmapper.poll(self.sessionID));
 };
 
 IFMapClient.prototype.subscribe = function(options) {
