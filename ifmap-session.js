@@ -9,7 +9,7 @@ var parser = require('xml2json');
 var redis;
 var redisClient;
 
-//https.globalAgent.maxSockets = 20;
+https.globalAgent.maxSockets = 20;
 
 var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useRedis) {
   events.EventEmitter.call(this);
@@ -23,12 +23,13 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
     path: soapPath,
     method: 'POST',
     auth: username + ':' + password,
-    //agent: new https.Agent({maxSockets:1}),
+    agent: false,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': ''
     }
   };
+  
   this.pollSessionOptions = {
     host: soapHost,
     port: soapPort,
@@ -41,6 +42,7 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
       'Content-Length': ''
     }
   };
+  
   this.sessionID = '';
   this.publisherID = '';
   this.useRedis = useRedis;
@@ -235,4 +237,30 @@ IFMapClient.prototype.subscribeDevice = function(options,deviceName) {
   });
 
   req.end(this.ifmapper.subscribeDevice(self.sessionID,deviceName)); 
+};
+
+IFMapClient.prototype.getUsers = function(options) {
+  var self = this;
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.getUsers(self.sessionID).length;
+  console.log('requesting users');
+  
+  var req = https.request(self.sessionOptions, function(res) {
+    res.on('data', function(d) {
+      console.log(d.toString());
+      var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      self.emit('response',output);
+    });
+    
+    res.on('end', function(d){
+      //self.emit('rec','channel12');
+    });
+  });
+
+  req.on('error', function(e) {
+    console.error(e);
+  });
+  
+  console.log(this.ifmapper.getUsers(self.sessionID));
+  
+  req.end(this.ifmapper.getUsers(self.sessionID)); 
 };
