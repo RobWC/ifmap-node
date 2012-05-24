@@ -1,11 +1,16 @@
 var IFMapClient = require('./ifmap-session.js').IFMapClient;
 
-var client = new IFMapClient('10.0.1.21', '443', '/dana-ws/soap/dsifmap', 'admin', 'hello', true);
-client.createSession();
+var client = new IFMapClient('10.0.1.21', '443', '/dana-ws/soap/dsifmap', 'admin', 'hello', false);
 
-client.on('sessionStart', function(d) {
-    console.log('Session Started!');
-    client.getUsers();
+client.on('sessionStart',function(d){
+    console.log('session started');
+    setInterval(client.sendCommand,5000);
+});
+
+client.on('commandSent',function(d){
+  console.log('commandSent');
+});
+
     //subscribing
     /*var subscribeCalback = function() {
         client.subscribeDevice({},'1000:45');
@@ -35,6 +40,5 @@ client.on('pollSession',function(d){
       console.log('Polling!')
       client.pollData();
     }, 5000);
-<<<<<<< HEAD
 });
 */

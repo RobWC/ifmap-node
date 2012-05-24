@@ -12,34 +12,25 @@ var redisClient;
 https.globalAgent.maxSockets = 20;
 
 var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useRedis) {
+  var self = this;
+  
   events.EventEmitter.call(this);
+  
   if (useRedis) {
     redis = require('redis');
     client = redis.createClient();
-  }
+  };
+  
   this.sessionOptions = {
     host: soapHost,
     port: soapPort,
     path: soapPath,
     method: 'POST',
     auth: username + ':' + password,
-    agent: false,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': ''
-    }
-  };
-  
-  this.pollSessionOptions = {
-    host: soapHost,
-    port: soapPort,
-    path: soapPath,
-    method: 'POST',
-    auth: username + ':' + password,
-    agent: false,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': ''
+      'Content-Length': '',
+      'Connection': 'Keep-Alive'
     }
   };
   
@@ -47,11 +38,110 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
   this.publisherID = '';
   this.useRedis = useRedis;
   this.ifmapper = new ifMapCommands();
+    
+  this.httpsSession = new Object();
+  
+  this.sessionOptions.headers['Content-Length'] = this.ifmapper.getSession().length
+  
+  var self = this;
+  
+  this.httpsSession.request = https.request(self.sessionOptions, function(res) {
+      
+    res.on('data', function(d) {
+      //this.httpsSession.response = res;
+      console.log(d.toString());
+      var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      if (!!output.SOAPENV_Envelope && !!output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid){
+        self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+        self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+        console.log('Session ID "' + self.sessionID +'"');
+        console.log('Publisher ID ' + self.publisherID);
+      };
+    });
+    
+    res.on('end', function(d){
+      this.emit('sessionStart',self.sessionID);
+    });
+    
+  });
+  
+  this.httpsSession.request.on('response', function(e) {
+    console.log('response')
+    //this.httpsSession.request.setSocketKeepAlive(enable=true);
+  });
+  
+  
+  this.httpsSession.request.on('socket', function(socket) {
+    //socket.emit("agentRemove");
+    console.log('socket assigned')
+    //this.httpsSession.request.setSocketKeepAlive(enable=true);
+  });
+  
+  this.httpsSession.request.on('error', function(e) {
+    console.error(e);
+  });
+  
+  this.httpsSession.request.write(self.ifmapper.getSession());
+  
 };
 
 util.inherits(IFMapClient,events.EventEmitter);
 
 exports.IFMapClient = IFMapClient;
+
+IFMapClient.prototype.sendCommand = function(command) {
+  var self = this;
+  console.log(self.httpsSession);
+  self.httpsSession.request.write(self.ifmapper.getUsers(self.sessionID));
+  self.emit('commandSent');
+};
+
+IFMapClient.prototype.createSession = function(options) {
+  var self = this;
+  
+  self.sessionOptions.headers['Content-Length'] = this.ifmapper.getSession().length
+  
+  self.httpsSession.request = https.request(self.sessionOptions, function(res) {
+      
+    res.on('data', function(d) {
+      //this.httpsSession.response = res;
+      console.log(d.toString());
+      var output = JSON.parse(parser.toJson(d.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      if (!!output.SOAPENV_Envelope && !!output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid){
+        self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+        self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+        console.log('Session ID "' + self.sessionID +'"');
+        console.log('Publisher ID ' + self.publisherID);
+      };
+    });
+    
+    res.on('end', function(d){
+      self.emit('sessionStart',self.sessionID);
+    });
+    
+  });
+  
+  self.httpsSession.request.on('response', function(e) {
+    console.log('response')
+    //this.httpsSession.request.setSocketKeepAlive(enable=true);
+  });
+  
+  
+  self.httpsSession.request.on('socket', function(socket) {
+    //socket.emit("agentRemove");
+    console.log('socket assigned')
+    //this.httpsSession.request.setSocketKeepAlive(enable=true);
+  });
+  
+  self.httpsSession.request.on('error', function(e) {
+    console.error(e);
+  });
+  
+  self.httpsSession.request.write(self.ifmapper.getSession());
+};
+
+/*
+
 
 IFMapClient.prototype.createSession = function(options) {
   var self = this;
@@ -65,7 +155,7 @@ IFMapClient.prototype.createSession = function(options) {
       if (!!output.SOAPENV_Envelope && !!output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid){
         self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
         self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-        console.log('Session ID ' + self.sessionID);
+        console.log('Session ID "' + self.sessionID +'"');
         console.log('Publisher ID ' + self.publisherID);
       };
     });
@@ -270,3 +360,4 @@ IFMapClient.prototype.getUsers = function(options) {
   
   req.end(this.ifmapper.getUsers(self.sessionID)); 
 };
+*/
