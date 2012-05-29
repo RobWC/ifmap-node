@@ -60,6 +60,7 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
     });
     
     res.on('end', function(d){
+      console.log(this.httpsSession.request);
       this.emit('sessionStart',self.sessionID);
     });
     
