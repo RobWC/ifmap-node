@@ -9,7 +9,7 @@ var ifmapper = new ifMapCommands();
 var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useRedis) {
   var self = this;
   events.EventEmitter.call(this);
-  
+
   this.connOpt = {
     soapHost: soapHost,
     soapPort: soapPort,
@@ -27,16 +27,16 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
   });
   
   this._clearTextStream.on('data',function(data){
-    
+    self.emit('data',data);
   });
   
   this._clearTextStream.on('error',function(data){
-    self.emit('error',{});
+    self.emit('error',data);
     console.log('Error: ' + data.toString());
   });
   
-  this._clearTextStream.on('end',function(){
-    self.emit('end',{});
+  this._clearTextStream.on('end',function(data){
+    self.emit('end',data);
     console.log('Connection Closed');
   });
   
@@ -46,8 +46,12 @@ util.inherits(IFMapClient,events.EventEmitter);
 
 exports.IFMapClient = IFMapClient;
 
+IFMapClient.prototype.request = function(body) {
+  //return soap body in json
+};
+
 var client = new IFMapClient('10.0.1.21',443,'/dana-ws/soap/dsifmap','admin','hello',false);
 
 client.on('connected', function(){
   console.log('Connected');  
-})
+});

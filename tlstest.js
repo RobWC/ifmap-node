@@ -31,7 +31,7 @@ var cleartextStream = tls.connect(443, '10.0.1.21',options, function() {
   //console.log(cleartextStream);
 });
 cleartextStream.setEncoding('utf8');
-cleartextStream.write(getHeaders(ifmapper.getSession().length)+  ifmapper.getSession());
+cleartextStream.write(getHeaders(ifmapper.getSession().length) + ifmapper.getSession());
 
 cleartextStream.on('data', function(data) {
   var split = data.split('\r\n');
@@ -46,7 +46,7 @@ cleartextStream.on('data', function(data) {
   var len = 0;  
   for (i in split) {
     if (!!split[i]) {
-      tempData = tempData ? tempData + ',' + split[i]: tempData = split[i];
+      tempData = tempData ? tempData + '::::' + split[i]: tempData = split[i];
     }
     
     if (split[i] == '') {
@@ -67,6 +67,7 @@ cleartextStream.on('data', function(data) {
     };
     
   };
+  console.log(header);
   var output = JSON.parse(parser.toJson(body.toString().replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
   console.log(output);
   };
