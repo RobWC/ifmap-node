@@ -6,6 +6,9 @@ var parser = require('xml2json');
 var ifMapCommands = require('./ifmap-commands.js').IFMapCommands;
 var ifmapper = new ifMapCommands();
 
+var buf = new Buffer('admin:hello', 'utf8');
+console.log*(buf.toString('base64'));
+
 var options = {
   // These are necessary only if using the client certificate authentication
   //key: fs.readFileSync('client-key.pem'),
@@ -19,7 +22,7 @@ var options = {
 //util.inherits(IFMapClient,events.EventEmitter);
 
 var getHeaders = function(length) {
-  var headers = 'POST /dana-ws/soap/dsifmap HTTP/1.1\r\nAuthorization: Basic YWRtaW46aGVsbG8=\r\nUser-Agent: node/6.18\r\nHost: users.rwc.io\r\nConnection: Keep-Alive\r\nAccept: */*\r\nContent-Type: text/xml\r\nContent-Length: ' + length + '\r\n\r\n';
+  var headers = 'POST /dana-ws/soap/dsifmap HTTP/1.1\r\nAuthorization: Basic YWRtaW46aGVsbG8=\r\nUser-Agent: ifmapper/6.18\r\nHost: users.rwc.io\r\nConnection: Keep-Alive\r\nAccept: */*\r\nContent-Type: text/xml\r\nContent-Length: ' + length + '\r\n\r\n';
   return headers;
 };
 
