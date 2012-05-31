@@ -2,28 +2,41 @@ var util = require('util');
 var events = require('events');
 
 ///////////////Request
-var Request = function(headers, body, stream) {
+
+//object path, body, 
+
+var Request = function(options, stream,callback) {
   events.EventEmitter.call(this);
+  var self = this;
   
-  this.headers = headers; //assuming reqheaders object
-  this.body = body;
+  this.headers = new ReqHeaders(options.host,'POST',options.path,options.auth); //assuming reqheaders object
+  this.body = options.body;
   this.clearStream = stream;
-  this.bodyLen = body.length;
-  this.response;
+  this.bodyLen = options.body.length;
+  //this.response;
+  this.headers.headers['Content-Length'] = this.bodyLen;
+  stream.write(this.headers.getHeadersString() + this.body);
+  
+  stream.on('data',function(data){
+    self.emit('end',new Response(data));
+  });
   
 };
 
 util.inherits(Request,events.EventEmitter);
-
-exports.Request = Request;
 
 Request.prototype._send = function() {
   //setup content length header
   this.headers['Content-Length'] = this.body.length;
   stream.write(this.headers + this.body)
   stream.on('data',function(data){
-    self.emit('data',data);
-  })
+    self.emit('end',new Response(data));
+  });
+};
+
+exports.request = function(options, stream,callback) {
+  
+  return new Request(options, stream,callback);
 };
 
 //////////////////////Response
@@ -37,7 +50,7 @@ var Response = function(data) {
 Response.prototype._pareseData = function(data) {
   var self = this;
   
-  var split = data.split('\r\n');
+  var split = data.toString().split('\r\n');
   if (split[0] != '0') {
     var header = '';
     var tempData = '';
@@ -106,7 +119,7 @@ var ReqHeaders = function(host, type, path, auth) {
     'Content-Length': ''
   };
   if ( !! auth && !! auth.username && !! auth.password) {
-    var buf = new Buffer('auth.username' + ':' + 'auth.password', 'utf8');
+    var buf = new Buffer(auth.username + ':' + auth.password, 'utf8');
     this.headers['Authorization'] = 'Basic ' + buf.toString('base64');
   };
 };
@@ -131,14 +144,14 @@ ReqHeaders.prototype.getHeadersString = function() {
 var ResHeaders = function(headers) {
   var _headArray = headers.split('::::');
   //pull off the method header first
-  var _methodHead = headArray.shift().split(' ');
+  var _methodHead = _headArray.shift().split(' ');
   this.method = {
     protocol: _methodHead[0],
     code: _methodHead[1],
     message: _methodHead[2]
   }
-  for (var i in headArray) {
-    var _headItem = headArray.split(':');
+  for (var i in _headArray) {
+    var _headItem = _headArray[i].split(':');
     this[_headItem[0]] = _headItem[1].replace(/\r\n$/, '').replace(/^\s+/, '');
   };
 };

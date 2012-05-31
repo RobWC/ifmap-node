@@ -3,6 +3,7 @@ var fs = require('fs');
 var util = require('util');
 var events = require('events');
 var parser = require('xml2json');
+var http = require('./http-messages.js');
 var ifMapCommands = require('./ifmap-commands.js').IFMapCommands;
 var ifmapper = new ifMapCommands();
 
@@ -40,15 +41,52 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
     console.log('Connection Closed');
   });
   
+  this.on('connected', function(){
+    //start session
+    //console.log('starting session')
+    self._newSession();
+  });
+  
 };
 
 util.inherits(IFMapClient,events.EventEmitter);
 
 exports.IFMapClient = IFMapClient;
 
+IFMapClient.prototype._newSession = function() {
+  var self = this;
+  
+  var options = {
+    host: this.connOpt.soapHost,
+    body: ifmapper.newSession(),
+    path: this.connOpt.soapPath,
+    auth: {
+      username: this.connOpt.username,
+      password: this.connOpt.password
+    }
+  };
+  
+  var req = new http.request(options,this._clearTextStream,function(res){
+  
+  });
+  
+  req.on('end', function(res){
+    //grab the session ID
+    if (!!res.body) {
+      var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      this.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+      this.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+    };
+  });
+  
+};
+
 IFMapClient.prototype.request = function(body) {
   //return soap body in json
 };
+
+
+//TEST AREA
 
 var client = new IFMapClient('10.0.1.21',443,'/dana-ws/soap/dsifmap','admin','hello',false);
 
