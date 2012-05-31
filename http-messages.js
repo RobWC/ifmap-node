@@ -15,6 +15,7 @@ var Request = function(options, stream,callback) {
   this.bodyLen = options.body.length;
   //this.response;
   this.headers.headers['Content-Length'] = this.bodyLen;
+  console.log(this.headers.getHeadersString() + this.body)
   stream.write(this.headers.getHeadersString() + this.body);
   
   stream.on('data',function(data){

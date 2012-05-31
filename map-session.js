@@ -42,8 +42,6 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useR
   });
   
   this.on('connected', function(){
-    //start session
-    //console.log('starting session')
     self._newSession();
   });
   
@@ -70,12 +68,44 @@ IFMapClient.prototype._newSession = function() {
   
   });
   
+  var callback = function(res){
+    //grab the session ID
+    if (!!res.body) {
+      var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+      self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+      console.log('SessionID ' + self.sessionID);
+      self.emit('newsession',self.sessionID);
+      req.removeListener('end', callback);
+    };
+  }
+  
+  req.on('end',callback);
+  
+};
+
+IFMapClient.prototype.getUsers = function() {
+  var self = this;
+  
+  var options = {
+    host: this.connOpt.soapHost,
+    body: ifmapper.getUsers(self.sessionID.replace(/\s/g,'')),
+    path: this.connOpt.soapPath,
+    auth: {
+      username: self.connOpt.username,
+      password: self.connOpt.password
+    }
+  };
+  
+  var req = new http.request(options,self._clearTextStream,function(res){
+  
+  });
+    
   req.on('end', function(res){
     //grab the session ID
     if (!!res.body) {
       var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-      this.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-      this.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
+      console.log(output.SOAPENV_Envelope.SOAPENV_Body);
     };
   });
   
@@ -90,6 +120,12 @@ IFMapClient.prototype.request = function(body) {
 
 var client = new IFMapClient('10.0.1.21',443,'/dana-ws/soap/dsifmap','admin','hello',false);
 
+
 client.on('connected', function(){
   console.log('Connected');  
+});
+
+client.on('newsession',function(data){
+  console.log('NEW SESSION ' + data);
+  client.getUsers();
 });
