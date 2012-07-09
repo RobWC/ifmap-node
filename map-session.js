@@ -74,7 +74,6 @@ IFMapClient.prototype._newSession = function() {
       var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
       self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
       self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-      console.log('SessionID ' + self.sessionID);
       self.emit('newsession',self.sessionID);
       req.removeListener('end', callback);
     };
@@ -89,7 +88,7 @@ IFMapClient.prototype.getUsers = function() {
   
   var options = {
     host: this.connOpt.soapHost,
-    body: ifmapper.getUsers(self.sessionID.replace(/\s/g,'')),
+    body: ifmapper.getUsers(self.sessionID),
     path: this.connOpt.soapPath,
     auth: {
       username: self.connOpt.username,
@@ -114,18 +113,3 @@ IFMapClient.prototype.getUsers = function() {
 IFMapClient.prototype.request = function(body) {
   //return soap body in json
 };
-
-
-//TEST AREA
-
-var client = new IFMapClient('10.0.1.21',443,'/dana-ws/soap/dsifmap','admin','hello',false);
-
-
-client.on('connected', function(){
-  console.log('Connected');  
-});
-
-client.on('newsession',function(data){
-  console.log('NEW SESSION ' + data);
-  client.getUsers();
-});

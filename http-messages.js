@@ -13,12 +13,10 @@ var Request = function(options, stream,callback) {
   this.body = options.body;
   this.clearStream = stream;
   this.bodyLen = options.body.length;
-  //this.response;
   this.headers.headers['Content-Length'] = this.bodyLen;
-  console.log(this.headers.getHeadersString() + this.body)
   stream.write(this.headers.getHeadersString() + this.body);
   
-  stream.on('data',function(data){
+  stream.on('data',function(data) {
     self.emit('end',new Response(data));
   });
   
@@ -38,6 +36,7 @@ Request.prototype._send = function() {
 exports.request = function(options, stream,callback) {
   
   return new Request(options, stream,callback);
+
 };
 
 //////////////////////Response
