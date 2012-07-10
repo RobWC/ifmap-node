@@ -121,16 +121,11 @@ IFMapClient.prototype.newPollSession = function(interval) {
 
 IFMapClient.prototype.endPollSession = function() {
   var self = this;
-  clearInterval(self.pollIntervalSession);
   self.pollSession.close();
 };
 
 IFMapClient.prototype.subscribe = function() {
   
-};
-
-IFMapClient.prototype.request = function(body) {
-  //return soap body in json
 };
 
 //poll session section
@@ -265,6 +260,7 @@ IFMapPollSession.prototype.close = function() {
       self.emit('pollEnd',output.SOAPENV_Envelope.SOAPENV_Body);
       console.log(output.SOAPENV_Envelope.SOAPENV_Body);
       //close socket
+      clearInterval(self.pollIntervalSession);
       self._clearTextStream.end();
     };
   });
