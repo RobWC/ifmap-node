@@ -6,9 +6,9 @@ var parser = require('xml2json');
 var http = require('./http-messages.js');
 var ifMapCommands = require('./ifmap-commands.js').IFMapCommands;
 var ifmapper = new ifMapCommands();
-var IFMapPollSession = require('./map-poller.js').IFMapPollSession;
 
-var IFMapClient = function(soapHost, soapPort, soapPath, username, password) {
+//poll session section
+var IFMapPollSession = function(soapHost, soapPort, soapPath, username, password,sessionID,publisherID,interval) {
   var self = this;
   events.EventEmitter.call(this);
 
@@ -19,49 +19,54 @@ var IFMapClient = function(soapHost, soapPort, soapPath, username, password) {
     username: username,
     password: password
   };
-
-  this.sessionID = '';
-  this.publisherID = '';
   
-  this.pollSession;
+  this.interval = interval;
+
+  this.sessionID = sessionID;
+  this.publisherID = publisherID;
+  
   this.pollIntervalSession;
   
   this._clearTextStream = tls.connect(this.connOpt.soapPort, this.connOpt.soapHost,{},function(){
-    self.emit('connected',{});
+    self.emit('pollConnected',{});
   });
-  
+
   this._clearTextStream.setMaxListeners(0);
   
   this._clearTextStream.on('data',function(data){
-    self.emit('data',data);
+    //self.emit('pollData',data);
   });
   
   this._clearTextStream.on('error',function(data){
-    self.emit('error',data);
+    self.emit('pollError',data);
     console.log('Error: ' + data.toString());
   });
   
   this._clearTextStream.on('end',function(data){
-    self.emit('end',data);
-    console.log('Connection Closed');
+    self.emit('pollEnd',data);
+    console.log('Poll Connection Closed');
   });
   
-  this.on('connected', function(){
+  this.on('pollConnected', function(){
     self._newSession();
   });
   
+  this.on('pollData', function(data){
+    console.log(data);
+  })
+  
 };
 
-util.inherits(IFMapClient,events.EventEmitter);
+util.inherits(IFMapPollSession,events.EventEmitter);
 
-exports.IFMapClient = IFMapClient;
+exports.IFMapPollSession = IFMapPollSession;
 
-IFMapClient.prototype._newSession = function() {
+IFMapPollSession.prototype._newSession = function() {
   var self = this;
   
   var options = {
     host: this.connOpt.soapHost,
-    body: ifmapper.newSession(),
+    body: ifmapper.getPollSession(self.sessionID),
     path: this.connOpt.soapPath,
     auth: {
       username: this.connOpt.username,
@@ -77,9 +82,12 @@ IFMapClient.prototype._newSession = function() {
     //grab the session ID
     if (!!res.body) {
       var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-      self.sessionID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_sessionid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-      self.publisherID = output.SOAPENV_Envelope.SOAPENV_Body.ifmap_publisherid.replace(/(\w)[_]{1}(\w)/gi, '$1:$2');
-      self.emit('newsession',self.sessionID);
+      self.emit('pollNewsession',self.sessionID);
+      var pollCallback = function() {
+        self.poll();
+        console.log('callback');
+      };
+      self.pollIntervalSession = setInterval(pollCallback,self.interval * 1000);
       req.removeListener('end', callback);
     };
   }
@@ -88,12 +96,39 @@ IFMapClient.prototype._newSession = function() {
   
 };
 
-IFMapClient.prototype.getUsers = function() {
+IFMapPollSession.prototype.poll = function() {
+  var self = this;
+  
+  var options = {
+    host: self.connOpt.soapHost,
+    body: ifmapper.poll(self.sessionID),
+    path: self.connOpt.soapPath,
+    auth: {
+      username: self.connOpt.username,
+      password: self.connOpt.password
+    }
+  };
+  
+  var req = new http.request(options,self._clearTextStream,function(res){
+  
+  });
+    
+  req.on('end', function(res){
+    //grab the session ID
+    if (!!res.body) {
+      var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      self.emit('pollData',output.SOAPENV_Envelope.SOAPENV_Body);
+    };
+  });
+  
+};
+
+IFMapPollSession.prototype.close = function() {
   var self = this;
   
   var options = {
     host: this.connOpt.soapHost,
-    body: ifmapper.getUsers(self.sessionID),
+    body: ifmapper.poll(self.sessionID),
     path: this.connOpt.soapPath,
     auth: {
       username: self.connOpt.username,
@@ -109,47 +144,11 @@ IFMapClient.prototype.getUsers = function() {
     //grab the session ID
     if (!!res.body) {
       var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      self.emit('pollEnd',output.SOAPENV_Envelope.SOAPENV_Body);
       console.log(output.SOAPENV_Envelope.SOAPENV_Body);
+      //close socket
+      clearInterval(self.pollIntervalSession);
+      self._clearTextStream.end();
     };
   });
-  
-};
-
-IFMapClient.prototype.newPollSession = function(interval) {
-  var self = this;
-  self.pollSession = new IFMapPollSession(self.connOpt.soapHost,self.connOpt.soapPort,self.connOpt.soapPath,self.connOpt.username,self.connOpt.password,self.sessionID,self.publisherID,interval);
-  //emit poll when data is recieved
-  //allow user to set polling interval at creation
-};
-
-IFMapClient.prototype.endPollSession = function() {
-  var self = this;
-  self.pollSession.close();
-};
-
-IFMapClient.prototype.subscribeDevice = function(host) {
-  var self = this;
-  
-  var options = {
-    host: this.connOpt.soapHost,
-    body: ifmapper.subscribeDevice(self.sessionID,host),
-    path: this.connOpt.soapPath,
-    auth: {
-      username: self.connOpt.username,
-      password: self.connOpt.password
-    }
-  };
-  
-  var req = new http.request(options,self._clearTextStream,function(res){
-  
-  });
-    
-  req.on('end', function(res){
-    //grab the session ID
-    if (!!res.body) {
-      var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-      console.log(output.SOAPENV_Envelope.SOAPENV_Body);
-    };
-  });
-  
 };

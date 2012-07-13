@@ -9,6 +9,8 @@ var Request = function(options, stream,callback) {
   events.EventEmitter.call(this);
   var self = this;
   
+  stream.setMaxListeners(0);
+  
   this.headers = new ReqHeaders(options.host,'POST',options.path,options.auth); //assuming reqheaders object
   this.body = options.body;
   this.clearStream = stream;

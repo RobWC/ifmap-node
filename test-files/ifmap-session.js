@@ -6,21 +6,14 @@ var events = require('events');
 var ifMapCommands = require('./ifmap-commands.js').IFMapCommands;
 //third party modules
 var parser = require('xml2json');
-var redis;
-var redisClient;
 
 https.globalAgent.maxSockets = 20;
 
-var IFMapClient = function(soapHost, soapPort, soapPath, username, password,useRedis) {
+var IFMapClient = function(soapHost, soapPort, soapPath, username, password) {
   var self = this;
   
   events.EventEmitter.call(this);
-  
-  if (useRedis) {
-    redis = require('redis');
-    client = redis.createClient();
-  };
-  
+
   this.sessionOptions = {
     host: soapHost,
     port: soapPort,
