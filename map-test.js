@@ -8,6 +8,6 @@ client.on('connected', function(){
 
 client.on('newsession',function(data){
   console.log('NEW SESSION ' + data);
-  client.subscribeDevice('10.0.1.20');
-  client.newPollSession(10);
+  client.subscribeIP('10.0.1.20');
+  client.newPollSession(30);
 });

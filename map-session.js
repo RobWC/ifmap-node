@@ -127,6 +127,33 @@ IFMapClient.prototype.endPollSession = function() {
   self.pollSession.close();
 };
 
+IFMapClient.prototype.subscribeIP = function(host) {
+  var self = this;
+  
+  var options = {
+    host: this.connOpt.soapHost,
+    body: ifmapper.subscribeIP(self.sessionID,host),
+    path: this.connOpt.soapPath,
+    auth: {
+      username: self.connOpt.username,
+      password: self.connOpt.password
+    }
+  };
+  
+  var req = new http.request(options,self._clearTextStream,function(res){
+  
+  });
+    
+  req.on('end', function(res){
+    //grab the session ID
+    if (!!res.body) {
+      var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
+      console.log(output.SOAPENV_Envelope.SOAPENV_Body);
+    };
+  });
+  
+};
+
 IFMapClient.prototype.subscribeDevice = function(host) {
   var self = this;
   

@@ -117,7 +117,7 @@ IFMapPollSession.prototype.poll = function() {
     //grab the session ID
     if (!!res.body) {
       var output = JSON.parse(parser.toJson(res.body.replace(/(\w)[-]{1}(\w)/gi, '$1$2').replace(/(\w)[:]{1}(\w)/gi, '$1_$2')));
-      self.emit('pollData',output.SOAPENV_Envelope.SOAPENV_Body);
+      self.emit('pollData',JSON.stringify(output.SOAPENV_Envelope.SOAPENV_Body));
     };
   });
   

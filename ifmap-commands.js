@@ -70,6 +70,27 @@ IFMapCommands.prototype.subscribeUser = function(sessionID,username) {
   return message;
 };
 
+
+IFMapCommands.prototype.subscribeIP = function(sessionID,deviceIP) {
+  username = 'happy';
+  var message = '<?xml version="1.0" encoding="utf-8"?>\
+  <SOAP-ENV:Envelope ' + soapNS + '>\
+    <SOAP-ENV:Header>\
+      <ifmap:session-id>' + sessionID + '</ifmap:session-id>\
+    </SOAP-ENV:Header>\
+    <SOAP-ENV:Body>\
+      <ifmap:subscribe validation="None">\
+        <update max-depth="5" name="nodesub">\
+          <identifier>\
+            <ip-address type="IPv4" value="' + deviceIP + '"></ip-address>\
+          </identifier>\
+        </update>\
+      </ifmap:subscribe>\
+    </SOAP-ENV:Body>\
+</SOAP-ENV:Envelope>';
+  return message;
+};
+
 IFMapCommands.prototype.subscribeDevice = function(sessionID,deviceName) {
   username = 'happy';
   var message = '<?xml version="1.0" encoding="utf-8"?>\
@@ -79,7 +100,7 @@ IFMapCommands.prototype.subscribeDevice = function(sessionID,deviceName) {
     </SOAP-ENV:Header>\
     <SOAP-ENV:Body>\
       <ifmap:subscribe validation="None">\
-        <update max-depth="4" name="admin">\
+        <update max-depth="5">\
           <identifier>\
             <device>\
               <name>' + deviceName +'</name>\
